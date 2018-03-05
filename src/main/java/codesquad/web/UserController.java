@@ -3,6 +3,7 @@ package codesquad.web;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +15,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import codesquad.UnAuthenticationException;
 import codesquad.domain.User;
 import codesquad.dto.UserDto;
+import codesquad.security.HttpSessionUtils;
 import codesquad.security.LoginUser;
 import codesquad.service.UserService;
 
@@ -44,6 +47,21 @@ public class UserController {
         log.debug("user size : {}", users.size());
         model.addAttribute("users", users);
         return "/user/list";
+    }
+    
+    @PostMapping("/login")
+    public String login(String userId, String password, HttpSession session) throws UnAuthenticationException {
+      User user = userService.login(userId, password);
+      if(user == null) {
+        return "/user/login_failed";
+      }
+      if(!user.matchPassword(password)) {
+        throw new IllegalStateException("비밀번호가 맞지않습니다.");
+      }
+      session.setAttribute(HttpSessionUtils.USER_SESSION_KEY, user);
+      return "redirect:/users";
+
+
     }
 
     @GetMapping("/{id}/form")
