@@ -35,8 +35,8 @@ public class LoginAcceptanceTest extends AcceptanceTest {
 
 	@Test
 	public void login() {
-		HtmlFormDataBuilder dataBuilder = HtmlFormDataBuilder.urlEncodedForm().
-				addParameter("userId", "ksm0814").addParameter("password", "k5696");
+		HtmlFormDataBuilder dataBuilder = HtmlFormDataBuilder.urlEncodedForm().addParameter("userId", "ksm0814")
+				.addParameter("password", "k5696");
 
 		HttpEntity<MultiValueMap<String, Object>> request = dataBuilder.build();
 		ResponseEntity<String> response = template().postForEntity("/users/login", request, String.class);
@@ -49,14 +49,13 @@ public class LoginAcceptanceTest extends AcceptanceTest {
 
 	@Test
 	public void loginFail() {
-		HtmlFormDataBuilder dataBuilder = HtmlFormDataBuilder.urlEncodedForm().
-				addParameter("userId", "ksm0814").addParameter("password", "notpass");
+		HtmlFormDataBuilder dataBuilder = HtmlFormDataBuilder.urlEncodedForm().addParameter("userId", "ksm0814")
+				.addParameter("password", "notpass");
 
 		HttpEntity<MultiValueMap<String, Object>> request = dataBuilder.build();
 		ResponseEntity<String> response = template().postForEntity("/users/login", request, String.class);
 		assertThat(response.getStatusCode(), is(HttpStatus.INTERNAL_SERVER_ERROR));
 		assertNotNull(userRepository.findByUserId("ksm0814"));
 	}
-
 
 }

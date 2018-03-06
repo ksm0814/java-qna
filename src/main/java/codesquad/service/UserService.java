@@ -40,10 +40,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User login(String userId, String password) throws UnAuthenticationException {
-    	Optional<User> user = userRepository.findByUserId(userId);
-    	if(user.isPresent())
-    		return user.get();
-        return null;
+	public User login(String userId, String password) throws UnAuthenticationException {
+    	return userRepository.findByUserId(userId).orElseThrow(NullPointerException::new);
     }
 }
