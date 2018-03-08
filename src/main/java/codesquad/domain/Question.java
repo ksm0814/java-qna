@@ -42,6 +42,7 @@ public class Question extends AbstractEntity implements UrlGeneratable {
     private boolean deleted = false;
 
     public Question() {
+    	
     }
 
     public Question(String title, String contents) {
