@@ -38,7 +38,6 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
 	public void create() throws Exception {
 		ResponseEntity<String> response = makeTestData("create 제목", "create 내용");
 		assertThat(response.getStatusCode(), is(HttpStatus.FOUND));
-	
 	}
 	
 

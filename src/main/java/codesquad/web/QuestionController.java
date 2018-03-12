@@ -34,8 +34,7 @@ public class QuestionController {
 
 	@PostMapping("")
 	public String create(@LoginUser User loginUser, QuestionDto question, Model model, HttpSession session) {
-		if (!checkAuth(loginUser, session).equals("success"))
-			return null;
+		checkAuth(loginUser, session);
 		qnaService.create(loginUser, question);
 		return "redirect:/";
 	}
@@ -48,8 +47,7 @@ public class QuestionController {
 
 	@GetMapping("/{id}/form")
 	public String updateForm(@LoginUser User loginUser, @PathVariable Long id, Model model, HttpSession session) {
-		if (!checkAuth(loginUser, session).equals("success"))
-			return null;
+		checkAuth(loginUser, session);
 		Question question = qnaService.findById(id);
 		model.addAttribute("question", question);
 		return "/qna/updateForm";
@@ -58,8 +56,7 @@ public class QuestionController {
 	@PutMapping("/{id}")
 	public String update(@LoginUser User loginUser, @PathVariable long id, QuestionDto updatequestion,
 			HttpSession session) {
-		if (!checkAuth(loginUser, session).equals("success"))
-			return null;
+		checkAuth(loginUser, session);
 		qnaService.update(loginUser, id, updatequestion);
 		return String.format("redirect:/questions/%d", id);
 	}
@@ -67,9 +64,7 @@ public class QuestionController {
 	@DeleteMapping("/{id}")
 	public String delete(@LoginUser User loginUser, @PathVariable long id, HttpSession session)
 			throws CannotDeleteException {
-		if (!checkAuth(loginUser, session).equals("success"))
-			return null;
-
+		checkAuth(loginUser, session);
 		qnaService.deleteQuestion(loginUser, id);
 		return "redirect:/";
 	}
