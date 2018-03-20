@@ -1,6 +1,8 @@
 package codesquad.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Resource;
 
@@ -13,10 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 import codesquad.CannotDeleteException;
 import codesquad.domain.Answer;
 import codesquad.domain.AnswerRepository;
+import codesquad.domain.DeleteHistory;
 import codesquad.domain.Question;
 import codesquad.domain.QuestionRepository;
 import codesquad.domain.User;
 import codesquad.dto.QuestionDto;
+import codesquad.dto.QuestionsDto;
 
 @Service("qnaService")
 public class QnaService {
@@ -53,11 +57,16 @@ public class QnaService {
 	@Transactional
 	public void deleteQuestion(User loginUser, long id) throws CannotDeleteException {
 		Question oldQuestion = findById(id);
-		if(loginUser.equals(null))
+		
+		if(oldQuestion.equals(null))
 			log.debug("난 널이다!!!!!!!!!!!!!!!!!!!!!!!!!!!11");
 		if (!oldQuestion.isOwner(loginUser))
 			throw new IllegalStateException("자신의 질문만 수정/삭제 가능합니다.");
-
+		
+		List<DeleteHistory> deleteHistories = Optional.ofNullable(oldQuestion.updateHistory()).orElse(new ArrayList<>());
+		if(deleteHistories.size() != 0)
+			deleteHistoryService.saveAll(deleteHistories);
+		
 		questionRepository.delete(id);
 	}
 
@@ -76,7 +85,8 @@ public class QnaService {
 	}
 
 	public Answer deleteAnswer(User loginUser, long id) {
-		// TODO 답변 삭제 기능 구현
-		return null;
+		Answer deleteAnswer = answerRepository.findOne(id);
+		answerRepository.delete(deleteAnswer);
+		return deleteAnswer;
 	}
 }
