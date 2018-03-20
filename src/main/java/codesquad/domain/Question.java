@@ -1,8 +1,5 @@
 package codesquad.domain;
 
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import codesquad.dto.QuestionDto;
-import codesquad.service.QnaService;
 import support.domain.AbstractEntity;
 import support.domain.UrlGeneratable;
 
@@ -71,24 +67,24 @@ public class Question extends AbstractEntity implements UrlGeneratable {
 		return writer;
 	}
 
-	public List<DeleteHistory> updateHistory() {
+	public List<DeleteHistory> delete(User loginUser) {
 		List<DeleteHistory> deleteHistories = new ArrayList<>();
-		if(answers.size() == 0)
-			return null;
-
+		
+		if(this.isDeleted())
+			throw new IllegalStateException("이미 삭제되어있는 질문입니다.");
+		if (!this.isOwner(loginUser))
+			throw new IllegalStateException("자신의 질문만 수정/삭제 가능합니다.");
+		
 		for (Answer answer : answers) {
-			if (!answer.isOwner(writer))
-				throw new IllegalStateException("질문자와 답변글의 글쓴이가 다릅니다.");
-			
-			deleteHistories.add(answer.deleteAnswer());
+			deleteHistories.add(answer.delete(writer));
 		}
 		deleteHistories.add(this.deleteQuestion());
-		
-		return deleteHistories;
 
+		return deleteHistories;
 	}
 
 	private DeleteHistory deleteQuestion() {
+		deleted = true;
 		return new DeleteHistory(ContentType.QUESTION, getId(), writer, LocalDateTime.now());
 	}
 
@@ -109,7 +105,6 @@ public class Question extends AbstractEntity implements UrlGeneratable {
 		return deleted;
 	}
 
-
 	@Override
 	public String generateUrl() {
 		return String.format("/questions/%d", getId());
@@ -119,7 +114,10 @@ public class Question extends AbstractEntity implements UrlGeneratable {
 		return new QuestionDto(getId(), this.title, this.contents);
 	}
 
-	public void update(QuestionDto updatequestion) {
+	public void update(User loginUser, QuestionDto updatequestion) {
+		if (!this.isOwner(loginUser))
+			throw new IllegalStateException("자신의 질문만 수정/삭제 가능합니다.");
+
 		this.title = updatequestion.getTitle();
 		this.contents = updatequestion.getContents();
 
@@ -129,6 +127,5 @@ public class Question extends AbstractEntity implements UrlGeneratable {
 	public String toString() {
 		return "Question [id=" + getId() + ", title=" + title + ", contents=" + contents + ", writer=" + writer + "]";
 	}
-
 
 }

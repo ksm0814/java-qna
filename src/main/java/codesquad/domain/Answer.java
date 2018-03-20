@@ -67,7 +67,6 @@ public class Answer extends AbstractEntity implements UrlGeneratable {
     }
 
     public boolean isOwner(User loginUser) {
-    	log.debug("답변 글쓴이 : {}, 질문자 : {}", writer, loginUser);
         return writer.equals(loginUser);
     }
     
@@ -75,7 +74,11 @@ public class Answer extends AbstractEntity implements UrlGeneratable {
         return question.equals(newQuestion);
     }
     
-    public DeleteHistory deleteAnswer() {
+    public DeleteHistory delete(User loginUser) {
+    	if(this.isDeleted())
+    		throw new IllegalStateException("이미 삭제되어있는 답변입니다.");
+    	if(!this.isOwner(loginUser))
+    		throw new IllegalStateException("질문자와 답변글의 글쓴이가 다릅니다.");
     	this.deleted = true;
     	return new DeleteHistory(ContentType.ANSWER, getId(), writer, LocalDateTime.now());
     }
